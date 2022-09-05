@@ -1,4 +1,4 @@
 object ethAnalysis extends App {
-  new apiObject.apiCalls
+  new extract.apiCalls
 
 }

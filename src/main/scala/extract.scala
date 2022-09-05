@@ -24,4 +24,5 @@ object extract {
       "Please choose which query to make on Ethereum: "
     }
 
+  }
 }
