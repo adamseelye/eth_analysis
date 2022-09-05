@@ -24,18 +24,6 @@ object apiObject {
       "Please choose which query to make on Ethereum: "
     }
 
-    // delete block later, use ui object
-    if (whichAPI == "1") {
-      println(curl_ts)
-    } else if (whichAPI == "2") {
-      println(curl_ep)
-    } else if (whichAPI == "3") {
-      println(curl_ns)
-    } else {
-      println("Error")
-    }
-
-
   }
 
 }
