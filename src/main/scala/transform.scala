@@ -1,9 +1,12 @@
 import io.circe.parser.parse
 import io.circe.{Decoder, HCursor, Json}
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.SparkSession
 
-object transform extends App {
-  val session = sparkCluster.spark
-  val sc = sparkCluster.spark.sparkContext
+
+object transform {
+  val session: SparkSession = sparkCluster.spark
+  val sc: SparkContext = sparkCluster.spark.sparkContext
 
   def dataTransform(): Map[String, String] = {
     val apiMap = extract.apiCalls()

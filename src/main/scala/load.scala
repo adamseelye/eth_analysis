@@ -1,85 +1,110 @@
 import org.apache.spark.{SparkContext, SparkFiles}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, Row, SQLContext, SaveMode, SparkSession}
+import org.apache.spark.rdd
 import org.apache.spark.sql.types.{LongType, StringType, StructField, StructType}
 
-object load extends App {
+object load {
   val session: SparkSession = sparkCluster.spark
   val sc: SparkContext = sparkCluster.spark.sparkContext
+  import session.implicits._
 
   val dataMap: Map[String, String] = transform.dataTransform()
-  val testMap: Map[String, String] = Map("one" -> "uno", "two" -> "dos", "three" -> "tres")
 
+  def tsFrame(): DataFrame = {
+    val supply = Seq(dataMap("totalsupply"))
+    val df = supply.toDF("total supply")
 
-  def tsFrame(): Unit = {
-    import session.implicits._
-
-    val supply = dataMap("totalsupply")
-    println(supply)
-
-    //val df = dataMap("totalsupply").toSeq.toDS()
-    //val df = testMap.toSeq.toDF("english", "spanish")
-
-    //df.show()
+    df
 
   }
 
-  tsFrame()
+  def epFrame(): DataFrame = {
+    val eth_price = Seq(Row(dataMap("ethbtc"), dataMap("ethusd"), dataMap("pricetime")))
 
-  def epFrame(): Unit = {
+    val dataStruct = StructType(Seq(
+      StructField("ETH/BTC", StringType, nullable = true),
+      StructField("ETH/USD", StringType, nullable = true),
+      StructField("Timestamp", StringType, nullable = true)
+    ))
+
+    val rdd = sc.parallelize(eth_price)
+
+    val df = session.createDataFrame(rdd, dataStruct)
+
+    df
 
   }
 
-  def nsFrame(): Unit = {
+  def nsFrame(): DataFrame = {
+    val node_size = Seq(Row(dataMap("blockheight"), dataMap("chaintime"), dataMap("chainsize")))
+
+    val dataStruct = StructType(Seq(
+      StructField("Block Height", StringType, nullable = true),
+      StructField("Chain Timestamp", StringType, nullable = true),
+      StructField("Chain Size (bytes)", StringType, nullable = true)
+    ))
+
+    val rdd = sc.parallelize(node_size)
+
+    val df = session.createDataFrame(rdd, dataStruct)
+
+    df
 
   }
 
-  def ncFrame(): Unit = {
+  def ncFrame(): DataFrame = {
+    val node_count = Seq(Row(dataMap("utctime"), dataMap("nodecount")))
+
+    val dataStruct = StructType(Seq(
+      StructField("Timestamp", StringType, nullable = true),
+      StructField("Node Count", StringType, nullable = true)
+    ))
+
+    val rdd = sc.parallelize(node_count)
+
+    val df = session.createDataFrame(rdd, dataStruct)
+
+    df
 
   }
 
-  def goFrame(): Unit = {
+  def goFrame(): DataFrame = {
+    val gas_oracle = Seq(Row(dataMap("safeprice"), dataMap("suggested"), dataMap("fastprice"), dataMap("basefee")))
+
+    val dataStruct = StructType(Seq(
+      StructField("Secure Gas Price", StringType, nullable = true),
+      StructField("Suggested Gas Price", StringType, nullable = true),
+      StructField("Fast Gas Price", StringType, nullable = true),
+      StructField("Base Transaction Fee", StringType, nullable = true)
+    ))
+
+    val rdd = sc.parallelize(gas_oracle)
+
+    val df = session.createDataFrame(rdd, dataStruct)
+
+    df
 
   }
 
-  def csvLoad(): Unit = {
-    val schema = StructType(
-      Array(
-        StructField("", LongType, nullable = true),
-        StructField("status", StringType, nullable = false),
-        StructField("message", StringType, nullable = false),
-        StructField("result", StringType, nullable = false)
-      )
-    )
+  def writeCSV(): Unit = {
+    val hdfsPath = "hdfs://data-srv:9000/user/hive/warehouse/eth_analysis"
 
-    val urlFile = "data/total_supply.csv"
+    tsFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/tscsv")
+    epFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/epcsv")
+    nsFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/nscsv")
+    ncFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/nccsv")
+    goFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/gocsv")
+  }
 
-    sc.addFile(urlFile)
 
-    var df = session
-      .read
-      .schema(schema)
-      .format("csv")
-      .option("header", "true")
-      .load("file://" + SparkFiles.get("total_supply.csv"))
+  def writeJSON(): Unit = {
+    val hdfsPath = "hdfs://data-srv:9000/user/hive/warehouse/eth_analysis"
 
-    df = df.select(
-      df(""),
-      df("status"),
-      df("message"),
-      df("result")
-    )
-
-    val testDF = session.read.format("csv").option("header", "true").load("hdfs://localhost:9000/testing/total_supply.csv")
-    testDF.createOrReplaceTempView("TestView")
-
-    val renamed = testDF.withColumnRenamed("_c0", "")
-
-    renamed.write.saveAsTable("total_supply")
-
-    val selectTS = session.sql("SELECT * FROM total_supply;")
-
-    selectTS.show()
-
+    tsFrame().write.mode("append").json(s"$hdfsPath/tsjson")
+    epFrame().write.mode("append").json(s"$hdfsPath/epjson")
+    nsFrame().write.mode("append").json(s"$hdfsPath/nsjson")
+    ncFrame().write.mode("append").json(s"$hdfsPath/ncjson")
+    goFrame().write.mode("append").json(s"$hdfsPath/gojson")
   }
 
 }
