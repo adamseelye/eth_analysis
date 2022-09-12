@@ -1,0 +1,46 @@
+@*
+ * This template is called from the `index` template. This template
+ * handles the rendering of the page header and body tags. It takes
+ * two arguments, a `String` for the title of the page and an `Html`
+ * object to insert into the body of the page.
+ *@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>@title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/styles.css")'>
+
+    <link rel="shortcut icon" type="image/x-icon" href='@routes.Assets.versioned("images/favicon_a.ico")'>
+    <!-- <script src='@routes.Assets.versioned("javascripts/prism.js")' type="text/javascript"></script> -->
+</head>
+
+<body>
+    <section id="top">
+        <div class="wrapper">
+            <img class="resize" src="assets/images/eth-assets/eth-glyph-colored.svg" alt="logo" />
+            <br>
+            <h1>Ethereum Analysis</h1>
+        </div>
+    </section>
+    <h1>This app was created with the purpose of reading various statistics from the Ethereum blockchain.</h1>
+    <h1>The data is sourced from <a class="links" href="https://etherscan.io">etherscan.io</a> using a free API key.</h1>
+    <br>
+    <h3>We may view the Ethereum total cryptocurrency supply (in Gwei), check currency and gas prices, and get block and node counts.</h3>
+    <h3>Most snapshot dates are at on a static date in 2019, however the Total Supply and Gas Prices are current.</h3>
+    <h3>The ability to select dates for all data queries will be available in the future.</h3>
+    <br>
+    <div class="links" style="padding-bottom: 100px;">
+    <a href="/totalsupply">Total Supply</a>
+    <a href="/ethprice">Prices</a>
+    <a href="/chainstats">Chain Stats</a>
+    <a href="/nodecount">Node Count</a>
+    <a href="/gasoracle">Gas Oracle</a>
+    </div>
+    @content
+</body>
+
+</html>

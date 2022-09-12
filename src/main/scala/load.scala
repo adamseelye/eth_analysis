@@ -94,6 +94,9 @@ object load {
     nsFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/nscsv")
     ncFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/nccsv")
     goFrame().write.mode(SaveMode.Overwrite).option("header", value = true).csv(s"$hdfsPath/gocsv")
+
+    println("CSVs written. Total Supply CSV file read output:")
+    session.read.format("csv").option("header", "true").load(s"$hdfsPath/tscsv").show()
   }
 
 
@@ -105,6 +108,9 @@ object load {
     nsFrame().write.mode("append").json(s"$hdfsPath/nsjson")
     ncFrame().write.mode("append").json(s"$hdfsPath/ncjson")
     goFrame().write.mode("append").json(s"$hdfsPath/gojson")
+
+    println("JSONs written. Total Supply JSON file read output:")
+    session.read.format("json").load(s"$hdfsPath/tsjson").show()
   }
 
 }
