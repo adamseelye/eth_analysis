@@ -1,11 +1,22 @@
-ThisBuild / version := "0.1.0-SNAPSHOT"
-
-ThisBuild / scalaVersion := "2.12.15"   // use for cluster connection
-
 lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
   .settings(
-    name := "eth_analysis"
+    name := """eth-analysis-testing""",
+    organization := "com.example",
+    version := "1.0-SNAPSHOT",
+    scalaVersion := "2.12.15",
+    libraryDependencies ++= Seq(
+      guice,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
+    ),
+    scalacOptions ++= Seq(
+      "-feature",
+      "-deprecation",
+      "-Xfatal-warnings"
+    )
   )
+
+PlayKeys.devSettings += "play.server.http.port" -> "8080"
 
 // Spark
 libraryDependencies += "org.apache.spark" %% "spark-core" % "3.3.0"
